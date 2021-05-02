@@ -18,15 +18,6 @@ const styles = {
   },
 };
 
-// const mapStateToProps = state => ({
-//   name: authSelectors.getUsername(state),
-//   avatar: defaultAvatar,
-// });
-
-// const mapDispatchToProps = {
-//   onLogout: authOperations.logOut,
-// };
-
 export default function UserMenu() {
   const dispatch = useDispatch();
   const name = useSelector(authSelectors.getUsername);
