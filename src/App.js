@@ -29,11 +29,9 @@ export default function App() {
           <PublicRoute path="/register" restricted redirectTo="/contacts">
             <RegisterView />
           </PublicRoute>
-          />
           <PublicRoute path="/login" restricted redirectTo="/contacts">
             <LoginView />
           </PublicRoute>
-          />
           <PrivateRoute path="/contacts" redirectTo="/login">
             <ContactsView />
           </PrivateRoute>

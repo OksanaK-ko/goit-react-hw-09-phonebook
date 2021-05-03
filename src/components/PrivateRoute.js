@@ -16,14 +16,7 @@ export default function PrivateRoute({
   const isLoggedIn = useSelector(authSelectors.getIsAuthenticated);
   return (
     <Route {...routeProps}>
-      (render=
-      {props => (isLoggedIn ? children : <Redirect to={redirectTo} />)})
+      {isLoggedIn ? children : <Redirect to={redirectTo} />}
     </Route>
   );
 }
-
-// const mapStateToProps = state => ({
-//   isAuthenticated: authSelectors.getIsAuthenticated(state),
-// });
-
-// export default connect(mapStateToProps)(PrivateRoute);
