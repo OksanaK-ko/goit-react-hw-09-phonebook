@@ -1,12 +1,13 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import ContactForm from '../components/ContactForm/ContactForm';
 import Contacts from '../components/Contacts/Contacts';
 import Filter from '../components/Filter/Filter';
 import Container from '../components/Container';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { contactsOperations } from '../redux/contacts';
 import { CSSTransition } from 'react-transition-group';
 import '../css/animation.css';
+// import { cleanup } from '@testing-library/react';
 
 const styles = {
   bar: {
@@ -25,49 +26,29 @@ const styles = {
   },
 };
 
-class ContactsView extends Component {
-  componentDidMount() {
-    this.props.fetchContacts();
-  }
-  render() {
-    return (
-      <Container>
-        <div style={styles.bar}>
-          <CSSTransition
-            in={true}
-            appear={true}
-            classNames="fade"
-            timeout={500}
-          >
-            <h1 style={styles.title}>Phonebook</h1>
-          </CSSTransition>
-          <ContactForm />
+export default function ContactsView() {
+  const dispatch = useDispatch();
 
-          <CSSTransition
-            in={true}
-            classNames="fade"
-            timeout={500}
-            unmountOnExit
-          >
-            <Filter />
-          </CSSTransition>
+  useEffect(() => {
+    dispatch(contactsOperations.fetchContacts());
+  }, [dispatch]);
 
-          <CSSTransition
-            in={true}
-            classNames="fade"
-            timeout={250}
-            unmountOnExit
-          >
-            <Contacts />
-          </CSSTransition>
-        </div>
-      </Container>
-    );
-  }
+  return (
+    <Container>
+      <div style={styles.bar}>
+        <CSSTransition in={true} appear={true} classNames="fade" timeout={500}>
+          <h1 style={styles.title}>Phonebook</h1>
+        </CSSTransition>
+        <ContactForm />
+
+        <CSSTransition in={true} classNames="fade" timeout={500} unmountOnExit>
+          <Filter />
+        </CSSTransition>
+
+        <CSSTransition in={true} classNames="fade" timeout={250} unmountOnExit>
+          <Contacts />
+        </CSSTransition>
+      </div>
+    </Container>
+  );
 }
-
-const mapDispatchToProps = dispatch => ({
-  fetchContacts: () => dispatch(contactsOperations.fetchContacts()),
-});
-
-export default connect(null, mapDispatchToProps)(ContactsView);

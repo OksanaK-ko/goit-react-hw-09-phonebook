@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { contactsOperations, contactsSelectors } from '../../redux/contacts';
 import { CSSTransition } from 'react-transition-group';
@@ -8,23 +8,25 @@ import s from './ContactForm.module.css';
 import { Alert } from 'react-bootstrap';
 import { Button } from 'react-bootstrap';
 
-class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-    error: false,
+export default function ContactForm() {
+  const dispatch = useDispatch();
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+  const [error, setError] = useState(false);
+  const contacts = useSelector(contactsSelectors.getVisibleContacts);
+  const isLoadingContacts = useSelector(contactsSelectors.getLoading);
+  const handleNameChange = e => {
+    setName(e.currentTarget.value);
+  };
+  const handleNumberChange = e => {
+    setNumber(e.currentTarget.value);
   };
 
-  handleChange = e => {
-    const { name, value } = e.currentTarget;
-    this.setState({
-      [name]: value,
-    });
-  };
+  const onSubmit = (name, number) =>
+    dispatch(contactsOperations.addContact({ name, number }));
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    const { contacts } = this.props;
     if (
       contacts.find(
         item =>
@@ -32,72 +34,58 @@ class ContactForm extends Component {
           e.currentTarget.elements[0].value.toLowerCase(),
       )
     ) {
-      this.setState(() => {
-        return {
-          error: true,
-        };
-      });
+      setError(true);
 
-      setTimeout(() => {
-        this.setState(() => {
-          return {
-            error: false,
-          };
-        });
+      return setTimeout(() => {
+        setError(false);
       }, 1500);
-      return;
     }
-    this.props.onSubmit(this.state);
-    this.reset();
+
+    onSubmit(name, number);
+    setName('');
+    setNumber('');
   };
-  reset = () => {
-    this.setState({ name: '', number: '' });
-  };
-  render() {
-    return (
-      <div>
-        <CSSTransition
-          in={this.state.error}
-          appear={true}
-          classNames="error"
-          timeout={250}
-          unmountOnExit
-        >
-          <Alert variant="warning">This contact exists already!</Alert>
-        </CSSTransition>
-        <form onSubmit={this.handleSubmit}>
-          <div className={s.form}>
-            <label className={s.label} htmlFor={this.nameInputId}>
-              Name
-              <input
-                className={s.input}
-                type="text"
-                name="name"
-                value={this.state.name}
-                onChange={this.handleChange}
-                id={this.nameInputId}
-              />
-            </label>
-            <label className={s.label} htmlFor={this.numberInputId}>
-              Number
-              <input
-                className={s.input}
-                type="text"
-                name="number"
-                value={this.state.number}
-                onChange={this.handleChange}
-                id={this.numberInputId}
-              />
-            </label>
-            <Button variant="secondary" size="lg" block type="submit">
-              Add contact
-            </Button>
-            {this.props.isLoadingContacts && <h1>Loading...</h1>}
-          </div>
-        </form>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <CSSTransition
+        in={error}
+        appear={true}
+        classNames="error"
+        timeout={250}
+        unmountOnExit
+      >
+        <Alert variant="warning">This contact exists already!</Alert>
+      </CSSTransition>
+      <form onSubmit={handleSubmit}>
+        <div className={s.form}>
+          <label className={s.label}>
+            Name
+            <input
+              className={s.input}
+              type="text"
+              name="name"
+              value={name}
+              onChange={handleNameChange}
+            />
+          </label>
+          <label className={s.label}>
+            Number
+            <input
+              className={s.input}
+              type="text"
+              name="number"
+              value={number}
+              onChange={handleNumberChange}
+            />
+          </label>
+          <Button variant="secondary" size="lg" block type="submit">
+            Add contact
+          </Button>
+          {isLoadingContacts && <h1>Loading...</h1>}
+        </div>
+      </form>
+    </div>
+  );
 }
 
 ContactForm.defaultProps = {
@@ -109,14 +97,3 @@ ContactForm.propTypes = {
   type: PropTypes.string,
   name: PropTypes.string,
 };
-
-const mapStateToProps = state => ({
-  contacts: contactsSelectors.getVisibleContacts(state),
-  isLoadingContacts: contactsSelectors.getLoading(state),
-});
-
-const mapDispatchToProps = dispatch => ({
-  onSubmit: data => dispatch(contactsOperations.addContact(data)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);

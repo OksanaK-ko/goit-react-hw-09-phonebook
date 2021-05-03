@@ -1,29 +1,36 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { contactsOperations, contactsSelectors } from '../../redux/contacts';
 import s from './Contacts.module.css';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { Button } from 'react-bootstrap';
 
-const Contacts = ({ contacts, onDeleteContact }) => (
-  <TransitionGroup component="ul" className={s.ContactList}>
-    {contacts.map(({ id, name, number }) => (
-      <CSSTransition key={id} timeout={250} classNames={s}>
-        <li className={s.ContactList_item}>
-          {name}: {number}
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => onDeleteContact(id)}
-          >
-            Delete
-          </Button>
-        </li>
-      </CSSTransition>
-    ))}
-  </TransitionGroup>
-);
+export default function Contacts() {
+  const contacts = useSelector(contactsSelectors.getVisibleContacts);
+  const dispatch = useDispatch();
+  const onDelete = useCallback(
+    id => {
+      dispatch(contactsOperations.deleteContact(id));
+    },
+    [dispatch],
+  );
+
+  return (
+    <TransitionGroup component="ul" className={s.ContactList}>
+      {contacts.map(({ id, name, number }) => (
+        <CSSTransition key={id} timeout={250} classNames={s}>
+          <li className={s.ContactList_item}>
+            {name}: {number}
+            <Button variant="danger" size="sm" onClick={() => onDelete(id)}>
+              Delete
+            </Button>
+          </li>
+        </CSSTransition>
+      ))}
+    </TransitionGroup>
+  );
+}
 
 Contacts.propTypes = {
   contacts: PropTypes.arrayOf(
@@ -35,13 +42,3 @@ Contacts.propTypes = {
   ),
   onDeleteContact: PropTypes.func,
 };
-
-const mapStateToProps = state => ({
-  contacts: contactsSelectors.getVisibleContacts(state),
-});
-
-const mapDispatchToProps = dispatch => ({
-  onDeleteContact: id => dispatch(contactsOperations.deleteContact(id)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(Contacts);

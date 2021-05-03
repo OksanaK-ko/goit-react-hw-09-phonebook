@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 import { contactsSelectors, changeFilter } from '../../redux/contacts';
@@ -8,12 +8,8 @@ export default function Filter() {
   const dispatch = useDispatch();
   const value = useSelector(contactsSelectors.getFilter);
 
-  const onChange = useCallback(
-    e => {
-      dispatch(changeFilter(e.target.value));
-    },
-    [dispatch],
-  );
+  const onChange = e => dispatch(changeFilter(e.target.value));
+
   return (
     <div className={s.form}>
       <label className={s.label}>
